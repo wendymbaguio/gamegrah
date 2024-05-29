@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #87CEEB;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #game-container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            background-color: #FFFFFF;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        #bird {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #FF5733;
+            top: 250px;
+            left: 50px;
+        }
+        .pipe {
+            position: absolute;
+            width: 60px;
+            background-color: #00FF00;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="bird"></div>
+        <div class="pipe" style="height: 200px; top: 0; left: 200px;"></div>
+        <div class="pipe" style="height: 300px; top: 300px; left: 400px;"></div>
+    </div>
+    <div class="button-container">
+        <button class="jump-button">Jump</button>
+        <button class="restart-button">Restart</button>
+    </div>
+    <script>
+        const bird = document.getElementById("bird");
+        let birdTop = 250;
+        const birdLeft = 2;
+        const gravity = 2;
+        const gameSpeed = 2;
+        let isGameOver = false;
+
+        function jump() {
+            if (!isGameOver) {
+                birdTop -= 50;
+                bird.style.top = birdTop + "px";
+            }
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "Space") jump();
+        });
+
+        document.querySelector('.jump-button').addEventListener('click', jump);
+
+        function gameLoop() {
+            if (!isGameOver) {
+                birdTop += gravity;
+                bird.style.top = birdTop + "px";
+
+                if (birdTop <= 0 || birdTop >= 560) {
+                    gameOver();
+                }
+
+                const pipes = document.querySelectorAll(".pipe");
+                pipes.forEach(pipe => {
+                    const pipeLeft = parseInt(pipe.style.left);
+                    if (pipeLeft > -60) {
+                        pipe.style.left = pipeLeft - gameSpeed + "px";
+
+                        // Check for collision
+                        if (
+                            birdLeft + 40 > pipeLeft &&
+                            birdLeft < pipeLeft + 60 &&
+                            (birdTop < parseInt(pipe.style.top) + parseInt(pipe.style.height) || birdTop + 40 > parseInt(pipe.style.top))
+                        ) {
+                            gameOver();
+                        }
+                    } else {
+                        pipe.style.left = "400px";
+                    }
+                });
+
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            alert("Game Over! Click OK to restart.");
+            restartGame();
+        }
+
+        function restartGame() {
+            birdTop = 250;
+            bird.style.top = birdTop + "px";
+            isGameOver = false;
+
+            const pipes = document.querySelectorAll(".pipe");
+            pipes.forEach(pipe => {
+                pipe.style.left = "400px";
+            });
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.querySelector('.restart-button').addEventListener('click', restartGame);
+
+        gameLoop();
+    </script>
+</body>
+</html>
